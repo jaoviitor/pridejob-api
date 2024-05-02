@@ -9,19 +9,19 @@ import com.project.api.model.UsuarioModel;
 
 public interface UsuarioRepository extends CrudRepository<UsuarioModel, Integer>{
 	
-	//Listar todos os usuários
+	// Listar todos os usuários
 	List<UsuarioModel> findAll();
 	
-	//Pesquisar por ID
+	// Pesquisar por ID
 	UsuarioModel findByIdUsuario(int IdUsuario);
 	
-	//Cadastrar / Alterar usuários
+	// Cadastrar / Alterar usuários
 	<UserMod extends UsuarioModel> UserMod save(UserMod usuario);
 	
-	//Remover usuários
+	// Remover usuários
 	void delete(UsuarioModel usuario);
 	
-	//Login do usuario
+	// Login do usuario
 	public Optional<UsuarioModel> findByEmail(String email); //vai buscar no banco um valor especifico da coluna email
 	
 }
