@@ -9,8 +9,11 @@ Este projeto foi desenvolvido com o intuito de cadastrar e gerenciar usuários, 
 
 A plataforma utiliza uma API desenvolvida em Java com Spring Boot, onde conta com diversas Endpoints para serviços diversos.
 
+Também é utilizada na aplicação um banco de dados MySQL para armazenamento de dados.
+
 ### Tecnologias
 <p display="inline-block">
   <img width="48" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg" />
-  <img width="48" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/javascript/javascript-plain.svg" alt="js-logo"/>
+  <img width="48" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/spring/spring-original-wordmark.svg" />
+  <img width="48" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg" />
 </p>
