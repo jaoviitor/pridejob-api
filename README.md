@@ -17,3 +17,9 @@ Também é utilizada na aplicação um banco de dados MySQL para armazenamento d
   <img width="48" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/spring/spring-original-wordmark.svg" />
   <img width="48" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg" />
 </p>
+
+### Ferramentas de desenvolvimento
+
+<p display="inline-block">
+  <img width="48" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/eclipse/eclipse-original-wordmark.svg" />
+</p>
