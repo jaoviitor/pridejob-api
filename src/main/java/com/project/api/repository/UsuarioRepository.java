@@ -15,6 +15,9 @@ public interface UsuarioRepository extends CrudRepository<UsuarioModel, Integer>
 	// Pesquisar por ID
 	UsuarioModel findByIdUsuario(int IdUsuario);
 	
+	//Pesquisar por CPF
+	UsuarioModel findByCpf(Long cpf);
+	
 	// Cadastrar / Alterar usuários
 	<UserMod extends UsuarioModel> UserMod save(UserMod usuario);
 	

@@ -1,6 +1,10 @@
 package com.project.api.model;
 
 import java.sql.Date;
+import java.util.Collection;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
@@ -14,7 +18,7 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name="usuario")
 @Access(AccessType.FIELD)
-public class UsuarioModel {
+public class UsuarioModel implements UserDetails{
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +31,7 @@ public class UsuarioModel {
 	@Column(columnDefinition = "VARCHAR(60)")
 	private String nomeSocial;
 	
-	@Column(columnDefinition = "VARCHAR(14)")
+	@Column(columnDefinition = "VARCHAR(14)", unique = true)
 	private Long cpf;
 	
 	@Column(columnDefinition = "DATE")
@@ -39,7 +43,7 @@ public class UsuarioModel {
 	@Column(columnDefinition = "VARCHAR(20)")
 	private String telefone;
 	
-	@Column(columnDefinition = "VARCHAR(60)")
+	@Column(columnDefinition = "VARCHAR(60)", unique = true)
 	private String email;
 	
 	@Column(columnDefinition = "VARCHAR(60)")
@@ -115,6 +119,48 @@ public class UsuarioModel {
 
 	public void setSenha(String senha) {
 		this.senha = senha;
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getPassword() {
+		// TODO Auto-generated method stub
+		return senha;
+	}
+
+	@Override
+	public String getUsername() {
+		// TODO Auto-generated method stub
+		return email;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		// TODO Auto-generated method stub
+		return true;
 	}
 	
 	

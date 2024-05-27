@@ -4,8 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,9 +22,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.api.dto.AuthRequest;
+import com.project.api.dto.AuthResponse;
 import com.project.api.model.ResponseModel;
 import com.project.api.model.UsuarioModel;
 import com.project.api.repository.UsuarioRepository;
+import com.project.api.service.MyUserDetailsService;
+import com.project.api.util.JwtUtil;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/api/usuario")
@@ -27,6 +38,15 @@ public class UserController {
 	
 	@Autowired
 	private final PasswordEncoder encoder;
+	
+	@Autowired
+    private AuthenticationManager authenticationManager;
+	
+	@Autowired
+    private MyUserDetailsService userDetailsService;
+	
+	@Autowired
+    private JwtUtil jwtUtil;
 	
 	@Autowired
     private UsuarioRepository usuarioRepository;
@@ -49,16 +69,36 @@ public class UserController {
 	
 	//Filtrar usuário
 	@GetMapping("/{idUsuario}")
-	public @ResponseBody UsuarioModel filtrar(@PathVariable Integer idUsuario) {
-		return actions.findByIdUsuario(idUsuario);
+	public ResponseEntity<?> filtrar(@PathVariable Integer idUsuario) {
+	    UsuarioModel usuario = actions.findByIdUsuario(idUsuario);
+	    if (usuario != null) {
+	        return ResponseEntity.ok(usuario);
+	    } else {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
+	    }
 	}
+
 	
 	// Cadastrar usuarios
 	@PostMapping("")
-	public @ResponseBody UsuarioModel cadastrar(@RequestBody UsuarioModel usuario) {
-		String senhaCriptografada = encoder.encode(usuario.getSenha());
-		usuario.setSenha(senhaCriptografada);
-		return actions.save(usuario);
+	public ResponseEntity<?> cadastrar(@RequestBody UsuarioModel usuario) {
+		Optional<UsuarioModel> usuarioOptional = usuarioRepository.findByEmail(usuario.getEmail());
+		if(usuarioOptional.isPresent()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Já existe um usuário cadastrado com este email");
+		}
+		
+		UsuarioModel usuarioExistente = actions.findByCpf(usuario.getCpf());
+		if (usuarioExistente != null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Já existe um usuário cadastrado com este CPF");
+		}
+		try {
+			String senhaCriptografada = encoder.encode(usuario.getSenha());
+			usuario.setSenha(senhaCriptografada);
+			UsuarioModel novoUsuario = actions.save(usuario);
+			return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
+		} catch (DataIntegrityViolationException e) {
+			return ResponseEntity.badRequest().body("Email ou CPF já cadastrados");
+		}
 	}
 	
 	//Editar usuário
@@ -77,6 +117,10 @@ public class UserController {
 	        usuario.setNomeSocial(usuarioAtualizado.getNomeSocial());
 	    }
 	    if (usuarioAtualizado.getCpf() != null) {
+	    	UsuarioModel usuarioExistente = actions.findByCpf(usuarioAtualizado.getCpf());
+			if (usuarioExistente != null && usuarioExistente.getIdUsuario() != idUsuario) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Já existe um usuário cadastrado com este CPF");
+			}
 	        usuario.setCpf(usuarioAtualizado.getCpf());
 	    }
 	    if (usuarioAtualizado.getDtNascimento() != null) {
@@ -89,6 +133,10 @@ public class UserController {
 	        usuario.setTelefone(usuarioAtualizado.getTelefone());
 	    }
 	    if (usuarioAtualizado.getEmail() != null) {
+	    	usuarioOptional = usuarioRepository.findByEmail(usuarioAtualizado.getEmail());
+			if(usuarioOptional.isPresent() && usuarioOptional.get().getIdUsuario() != idUsuario) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Já existe um usuário cadastrado com este email");
+			}
 	        usuario.setEmail(usuarioAtualizado.getEmail());
 	    }
 	    if (usuarioAtualizado.getSenha() != null) {
@@ -107,7 +155,11 @@ public class UserController {
 		ResponseModel response = new ResponseModel();
 		
 		try {
-			UsuarioModel usuario = filtrar(idUsuario);
+			UsuarioModel usuario = actions.findByIdUsuario(idUsuario);
+			if (usuario == null) {
+				response.setMessage("Usuário não encontrado");
+				return response;
+			}
 			this.actions.delete(usuario);
 			response.setMessage("Usuário removido com sucesso");
 		}catch(Exception erro) {
@@ -116,7 +168,7 @@ public class UserController {
 		return response;
 	}
 	
-	//Validar senha
+	//Validar senha	
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody UsuarioModel usuarioLogin) {
 		Optional<UsuarioModel> usuarioOptional = usuarioRepository.findByEmail(usuarioLogin.getEmail());
@@ -127,7 +179,9 @@ public class UserController {
 		if (!encoder.matches(usuarioLogin.getSenha(), usuario.getSenha())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Senha inválida");
         }
-		return ResponseEntity.ok("Login bem-sucedido");
+		final String jwt = jwtUtil.createToken(usuarioLogin.getEmail());
+		AuthResponse authResponse = new AuthResponse(jwt, usuario.getIdUsuario(), usuario.getNome(), usuario.getEmail());
+        return ResponseEntity.ok(authResponse);	
 	}
 	
 	
