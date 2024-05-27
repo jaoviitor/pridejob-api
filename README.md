@@ -1,2 +1,2 @@
-# pridejob-api
-Repositório para API em Spring do projeto PrideJob Connect
+<h1 align="center">PrideJob Connect</h1>
+<p align="center"><i>Repositório do projeto PrideJob Connect</i></p>
