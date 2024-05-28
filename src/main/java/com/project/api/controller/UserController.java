@@ -27,6 +27,7 @@ import com.project.api.dto.AuthResponse;
 import com.project.api.model.ResponseModel;
 import com.project.api.model.UsuarioModel;
 import com.project.api.repository.UsuarioRepository;
+import com.project.api.service.EmailService;
 import com.project.api.service.MyUserDetailsService;
 import com.project.api.util.JwtUtil;
 
@@ -50,6 +51,9 @@ public class UserController {
 	
 	@Autowired
     private UsuarioRepository usuarioRepository;
+	
+	@Autowired
+	private EmailService emailService;
 	
 	
 	public UserController(PasswordEncoder encoder) {
@@ -82,6 +86,7 @@ public class UserController {
 	// Cadastrar usuarios
 	@PostMapping("")
 	public ResponseEntity<?> cadastrar(@RequestBody UsuarioModel usuario) {
+		UsuarioModel novoUsuario;
 		Optional<UsuarioModel> usuarioOptional = usuarioRepository.findByEmail(usuario.getEmail());
 		if(usuarioOptional.isPresent()) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Já existe um usuário cadastrado com este email");
@@ -94,11 +99,14 @@ public class UserController {
 		try {
 			String senhaCriptografada = encoder.encode(usuario.getSenha());
 			usuario.setSenha(senhaCriptografada);
-			UsuarioModel novoUsuario = actions.save(usuario);
-			return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
+			novoUsuario = actions.save(usuario);	
 		} catch (DataIntegrityViolationException e) {
 			return ResponseEntity.badRequest().body("Email ou CPF já cadastrados");
 		}
+		String subject = "Bem-vindo ao nosso serviço!";
+		String text = "Olá " + usuario.getNome() + ",\n\nObrigado por se cadastrar no nosso serviço.";
+		emailService.sendEmail(usuario.getEmail(), subject, text);
+		return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
 	}
 	
 	//Editar usuário
