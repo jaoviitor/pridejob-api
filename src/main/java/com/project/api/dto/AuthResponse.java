@@ -17,4 +17,17 @@ public class AuthResponse {
     public String getJwt() {
         return jwt;
     }
+    
+    public Long getId() {
+        return id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+    
 }
