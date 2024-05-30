@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name="usuario")
 @Access(AccessType.FIELD)
-public class UsuarioModel implements UserDetails{
+public class UsuarioModel{
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,6 +48,10 @@ public class UsuarioModel implements UserDetails{
 	
 	@Column(columnDefinition = "VARCHAR(60)")
 	private String senha;
+	
+	private boolean activated;
+	
+	private String activationToken;
 	
 	public Long getIdUsuario() {
 		return idUsuario;
@@ -121,51 +125,20 @@ public class UsuarioModel implements UserDetails{
 		this.senha = senha;
 	}
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getPassword() {
-		// TODO Auto-generated method stub
-		return senha;
-	}
-
-	@Override
-	public String getUsername() {
-		// TODO Auto-generated method stub
-		return email;
-	}
-
-	@Override
-	public boolean isAccountNonExpired() {
-		// TODO Auto-generated method stub
-		return true;
-	}
-
-	@Override
-	public boolean isAccountNonLocked() {
-		// TODO Auto-generated method stub
-		return true;
-	}
-
-	@Override
-	public boolean isCredentialsNonExpired() {
-		// TODO Auto-generated method stub
-		return true;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		// TODO Auto-generated method stub
-		return true;
+	public boolean isActivated() {
+		return activated;
 	}
 	
+	public void setActivated(boolean activated) {
+		this.activated = activated;
+	}
 	
+	public String getActivationToken() {
+        return activationToken;
+    }
 	
-	
-	
+	public void setActivationToken(String activationToken) {
+        this.activationToken = activationToken;
+    }
 	
 }
