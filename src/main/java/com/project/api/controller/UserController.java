@@ -2,6 +2,7 @@ package com.project.api.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -99,12 +100,14 @@ public class UserController {
 		try {
 			String senhaCriptografada = encoder.encode(usuario.getSenha());
 			usuario.setSenha(senhaCriptografada);
+			usuario.setActivated(false);
+			usuario.setActivationToken(UUID.randomUUID().toString());
 			novoUsuario = actions.save(usuario);	
 		} catch (DataIntegrityViolationException e) {
 			return ResponseEntity.badRequest().body("Email ou CPF já cadastrados");
 		}
-		String subject = "Bem-vindo ao nosso serviço!";
-		String text = "Olá " + usuario.getNome() + ",\n\nObrigado por se cadastrar no nosso serviço.";
+		String subject = "Bem-vindo ao PrideJob Connect!";
+		String text = "Olá " + usuario.getNome() + ",\n\nObrigado por se cadastrar no PrideJob Connect.";
 		emailService.sendEmail(usuario.getEmail(), subject, text);
 		return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
 	}
